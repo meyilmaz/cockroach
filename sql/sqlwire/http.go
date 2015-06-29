@@ -31,7 +31,7 @@ const (
 // Request is an interface for RPC requests.
 type Request interface {
 	gogoproto.Message
-	Header() *SQLRequestHeader
+	Header() *RequestHeader
 	// Method returns the request method.
 	Method() Method
 	// CreateReply creates a new response object.
@@ -42,7 +42,7 @@ type Request interface {
 type Response interface {
 	gogoproto.Message
 	// Header returns the response header.
-	Header() *SQLResponseHeader
+	Header() *ResponseHeader
 }
 
 // A Call is a pending database API call.
@@ -52,28 +52,28 @@ type Call struct {
 }
 
 // Header returns the request header.
-func (r *SQLRequestHeader) Header() *SQLRequestHeader {
+func (r *RequestHeader) Header() *RequestHeader {
 	return r
 }
 
 // Method returns the method.
-func (*SQLRequest) Method() Method {
+func (*Request) Method() Method {
 	return Execute
 }
 
 // CreateReply creates an empty response for the request.
-func (*SQLRequest) CreateReply() Response {
-	return &SQLResponse{}
+func (*Request) CreateReply() Response {
+	return &Response{}
 }
 
 // Header returns the response header.
-func (r *SQLResponseHeader) Header() *SQLResponseHeader {
+func (r *ResponseHeader) Header() *ResponseHeader {
 	return r
 }
 
 // SetGoError converts the specified type into either one of the proto-
 // defined error types or into a Error for all other Go errors.
-func (r *SQLResponseHeader) SetGoError(err error) {
+func (r *ResponseHeader) SetGoError(err error) {
 	if err == nil {
 		r.Error = nil
 		return
