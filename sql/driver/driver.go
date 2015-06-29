@@ -22,6 +22,7 @@ import (
 	"database/sql/driver"
 
 	"github.com/cockroachdb/cockroach/client"
+	"github.com/cockroachdb/cockroach/sql/query"
 )
 
 func init() {
@@ -37,5 +38,7 @@ func (d *roachDriver) Open(dsn string) (driver.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &conn{db: db}, nil
+	return &conn{
+		Planner: query.Planner{DB: db},
+	}, nil
 }

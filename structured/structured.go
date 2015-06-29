@@ -188,6 +188,32 @@ func (desc *TableDescriptor) Validate() error {
 	return nil
 }
 
+// FindColumnByName finds the column with specified name.
+func (desc *TableDescriptor) FindColumnByName(name string) (ColumnDescriptor, error) {
+	// TODO(pmattis): This should really be done using a map from column name to
+	// column descriptor.
+	for _, c := range desc.Columns {
+		if c.Name == name {
+			return c, nil
+		}
+	}
+	c := ColumnDescriptor{}
+	return c, fmt.Errorf("column \"%s\" does not exist", name)
+}
+
+// FindColumnByID finds the column with specified ID.
+func (desc *TableDescriptor) FindColumnByID(id uint32) (ColumnDescriptor, error) {
+	// TODO(pmattis): This should really be done using a map from column id to
+	// column descriptor.
+	for _, c := range desc.Columns {
+		if c.ID == id {
+			return c, nil
+		}
+	}
+	c := ColumnDescriptor{}
+	return c, fmt.Errorf("column-id \"%d\" does not exist", id)
+}
+
 // SQLString returns the SQL string corresponding to the type.
 func (c *ColumnType) SQLString() string {
 	switch c.Kind {
