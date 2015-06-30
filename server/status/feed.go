@@ -18,6 +18,8 @@
 package status
 
 import (
+	"sync"
+
 	"github.com/cockroachdb/cockroach/proto"
 	"github.com/cockroachdb/cockroach/util"
 )
@@ -38,6 +40,13 @@ type CallSuccessEvent struct {
 type CallErrorEvent struct {
 	NodeID proto.NodeID
 	Method proto.Method
+}
+
+// CanaryEvent is intended for testing only; it can be used by tests to
+// synchronize with feed consumers. A NodeEventListener will call Done() on
+// every CanaryEvent encountered.
+type CanaryEvent struct {
+	sync.WaitGroup
 }
 
 // NodeEventFeed is a helper structure which publishes node-specific events to a
@@ -108,6 +117,8 @@ func ProcessNodeEvents(l NodeEventListener, sub *util.Subscription) {
 			l.OnCallSuccess(specificEvent)
 		case *CallErrorEvent:
 			l.OnCallError(specificEvent)
+		case *CanaryEvent:
+			specificEvent.Done()
 		}
 	}
 }

@@ -310,37 +310,3 @@ func TestScannerEmptyRangeSet(t *testing.T) {
 		t.Errorf("expected three loops; got %d", count)
 	}
 }
-
-// TestScannerStats verifies that stats accumulate from all ranges.
-func TestScannerStats(t *testing.T) {
-	defer leaktest.AfterTest(t)
-	const count = 3
-	ranges := newTestRangeSet(count, t)
-	q := &testQueue{}
-	stopper := util.NewStopper()
-	defer stopper.Stop()
-	s := newRangeScanner(1*time.Millisecond, 0, ranges, nil)
-	s.AddQueues(q)
-	mc := hlc.NewManualClock(0)
-	clock := hlc.NewClock(mc.UnixNano)
-	// At start, scanner stats should be blank for MVCC, but have accurate number of ranges.
-	if rc := s.Stats().RangeCount; rc != count {
-		t.Errorf("range count expected %d; got %d", count, rc)
-	}
-	if vb := s.Stats().MVCC.ValBytes; vb != 0 {
-		t.Errorf("value bytes expected %d; got %d", 0, vb)
-	}
-	s.Start(clock, stopper)
-	// We expect a full run to accumulate stats from all ranges.
-	if err := util.IsTrueWithin(func() bool {
-		if rc := s.Stats().RangeCount; rc != count {
-			return false
-		}
-		if vb := s.Stats().MVCC.ValBytes; vb != count*2 {
-			return false
-		}
-		return true
-	}, 100*time.Millisecond); err != nil {
-		t.Error(err)
-	}
-}
