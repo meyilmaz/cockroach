@@ -84,7 +84,7 @@ func parseInt(yylex yyLexer, s string) (int, bool) {
 %token tokBlob tokTinyBlob tokMediumBlob tokLongBlob
 %token tokBit tokEnum
 
-%token <str> tokID tokString tokNumber tokValueArg tokComment
+%token <str> tokID tokString tokInteger tokNumber tokValueArg tokComment
 %token <empty> tokLE tokGE tokNE tokNullSafeEqual
 %token <empty> '(' '=' '<' '>' '~'
 
@@ -892,18 +892,7 @@ value_expression:
   }
 | unary_operator value_expression %prec tokUnary
   {
-    if num, ok := $2.(NumVal); ok {
-      switch $1 {
-      case '-':
-        $$ = NumVal("-" + string(num))
-      case '+':
-        $$ = num
-      default:
-        $$ = &UnaryExpr{Operator: $1, Expr: $2}
-      }
-    } else {
-      $$ = &UnaryExpr{Operator: $1, Expr: $2}
-    }
+    $$ = &UnaryExpr{Operator: $1, Expr: $2}
   }
 | sql_id '(' ')'
   {
@@ -1004,6 +993,10 @@ value:
   tokString
   {
     $$ = StrVal($1)
+  }
+| tokInteger
+  {
+    $$ = IntVal($1)
   }
 | tokNumber
   {
@@ -1199,7 +1192,7 @@ int_opt:
   { $$ = $2 }
 
 int_val:
-  tokNumber
+  tokInteger
   {
     i, ok := parseInt(yylex, $1)
     if !ok {

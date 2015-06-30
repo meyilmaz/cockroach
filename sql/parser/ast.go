@@ -450,6 +450,7 @@ func (*RangeCond) expr()      {}
 func (*NullCheck) expr()      {}
 func (*ExistsExpr) expr()     {}
 func (StrVal) expr()          {}
+func (IntVal) expr()          {}
 func (NumVal) expr()          {}
 func (ValArg) expr()          {}
 func (*NullVal) expr()        {}
@@ -590,6 +591,7 @@ type ValExpr interface {
 }
 
 func (StrVal) valExpr()      {}
+func (IntVal) valExpr()      {}
 func (NumVal) valExpr()      {}
 func (ValArg) valExpr()      {}
 func (*NullVal) valExpr()    {}
@@ -620,11 +622,18 @@ func (node BytesVal) String() string {
 	return string(encodeSQLBytes(scratch[0:0], []byte(node)))
 }
 
+// IntVal represents an integer.
+type IntVal string
+
+func (node IntVal) String() string {
+	return string(node)
+}
+
 // NumVal represents a number.
 type NumVal string
 
 func (node NumVal) String() string {
-	return fmt.Sprintf("%s", string(node))
+	return string(node)
 }
 
 // ValArg represents a named bind var argument.

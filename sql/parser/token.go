@@ -154,7 +154,7 @@ func (tkn *tokenizer) Lex(lval *yySymType) int {
 		typ, val = tkn.Scan()
 	}
 	switch typ {
-	case tokID, tokString, tokNumber, tokValueArg, tokComment, tokAnd, tokOr, tokNot:
+	case tokID, tokString, tokInteger, tokNumber, tokValueArg, tokComment, tokAnd, tokOr, tokNot:
 		lval.str = string(val)
 	}
 	tkn.errorToken = val
@@ -315,8 +315,11 @@ func (tkn *tokenizer) scanMantissa(base int, buffer *bytes.Buffer) {
 }
 
 func (tkn *tokenizer) scanNumber(seenDecimalPoint bool) (int, []byte) {
+	typ := tokInteger
+
 	buffer := bytes.NewBuffer(make([]byte, 0, 8))
 	if seenDecimalPoint {
+		typ = tokNumber
 		buffer.WriteByte('.')
 		tkn.scanMantissa(10, buffer)
 		goto exponent
@@ -354,12 +357,14 @@ func (tkn *tokenizer) scanNumber(seenDecimalPoint bool) (int, []byte) {
 
 fraction:
 	if tkn.lastChar == '.' {
+		typ = tokNumber
 		tkn.consumeNext(buffer)
 		tkn.scanMantissa(10, buffer)
 	}
 
 exponent:
 	if tkn.lastChar == 'e' || tkn.lastChar == 'E' {
+		typ = tokNumber
 		tkn.consumeNext(buffer)
 		if tkn.lastChar == '+' || tkn.lastChar == '-' {
 			tkn.consumeNext(buffer)
@@ -368,7 +373,7 @@ exponent:
 	}
 
 exit:
-	return tokNumber, buffer.Bytes()
+	return typ, buffer.Bytes()
 }
 
 func (tkn *tokenizer) scanString(delim uint16, typ int) (int, []byte) {

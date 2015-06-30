@@ -62,9 +62,10 @@ message Datum {
   option (gogoproto.onlyone) = true;
   oneof value {
     int64 int_val = 1;
-    double float_val = 2;
-    bytes bytes_val = 3;
-    string string_val = 4;
+    uint64 uint_val = 2;
+    double float_val = 3;
+    bytes bytes_val = 4;
+    string string_val = 5;
   }
 
   // TODO(pmattis): How to add end-to-end checksumming? Just adding a checksum
